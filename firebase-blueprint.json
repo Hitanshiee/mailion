@@ -1,0 +1,156 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user-specific data and settings.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "plan": { "type": "string", "enum": ["free", "premium"] },
+        "templateCount": { "type": "integer" },
+        "gmailConnected": { "type": "boolean" },
+        "smtpSettings": {
+          "type": "object",
+          "properties": {
+            "host": { "type": "string" },
+            "port": { "type": "integer" },
+            "secure": { "type": "boolean" },
+            "user": { "type": "string" },
+            "pass": { "type": "string" },
+            "fromName": { "type": "string" },
+            "fromEmail": { "type": "string" }
+          }
+        },
+        "googleSheetId": { "type": "string", "description": "The ID of the Google Sheet to sync with" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "plan"]
+    },
+    "Campaign": {
+      "title": "Campaign",
+      "description": "An email outreach campaign.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "status": { "type": "string", "enum": ["draft", "scheduled", "sending", "paused", "completed"] },
+        "schedule": {
+          "type": "object",
+          "properties": {
+            "timezone": { "type": "string" },
+            "startTime": { "type": "string" },
+            "endTime": { "type": "string" },
+            "interval": { "type": "integer", "description": "Interval in minutes between emails" },
+            "batchSize": { "type": "integer", "description": "Emails per batch" }
+          }
+        },
+        "templateId": { "type": "string" },
+        "followupTemplateIds": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name", "status"]
+    },
+    "Contact": {
+      "title": "Contact",
+      "description": "A lead within a campaign.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "campaignId": { "type": "string" },
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "company": { "type": "string" },
+        "website": { "type": "string" },
+        "linkedinUrl": { "type": "string" },
+        "enrichment": {
+          "type": "object",
+          "properties": {
+            "linkedinData": { "type": "string" },
+            "websiteData": { "type": "string" },
+            "status": { "type": "string", "enum": ["pending", "processing", "completed", "failed"] }
+          }
+        },
+        "personalization": {
+          "type": "object",
+          "properties": {
+            "subject": { "type": "string" },
+            "body": { "type": "string" },
+            "status": { "type": "string", "enum": ["pending", "generated"] }
+          }
+        },
+        "status": { "type": "string", "enum": ["pending", "sent", "opened", "replied", "bounced"] },
+        "metrics": {
+          "type": "object",
+          "properties": {
+            "openedAt": { "type": "string", "format": "date-time" },
+            "repliedAt": { "type": "string", "format": "date-time" },
+            "openCount": { "type": "integer" }
+          }
+        },
+        "sentAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["campaignId", "email", "status"]
+    },
+    "Template": {
+      "title": "Email Template",
+      "description": "Pre-defined or user-created email templates.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string", "description": "UID of the creator, or 'system' for global templates" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "subject": { "type": "string" },
+        "body": { "type": "string" },
+        "isPublic": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "category", "subject", "body"]
+    },
+    "SupportTicket": {
+      "title": "Support Ticket",
+      "description": "A user-submitted support ticket or feature request.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "type": { "type": "string", "enum": ["bug", "feature", "support"] },
+        "status": { "type": "string", "enum": ["open", "in-progress", "resolved"] },
+        "upvotes": { "type": "array", "items": { "type": "string" }, "description": "Array of user UIDs who upvoted" },
+        "upvoteCount": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "description", "type", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles"
+    },
+    "/campaigns/{campaignId}": {
+      "schema": "Campaign",
+      "description": "Campaign data"
+    },
+    "/campaigns/{campaignId}/contacts/{contactId}": {
+      "schema": "Contact",
+      "description": "Contacts within a campaign"
+    },
+    "/templates/{templateId}": {
+      "schema": "Template",
+      "description": "Email templates"
+    },
+    "/support_tickets/{ticketId}": {
+      "schema": "SupportTicket",
+      "description": "Support tickets and feature requests"
+    }
+  }
+}
