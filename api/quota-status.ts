@@ -1,9 +1,8 @@
 import admin from "firebase-admin";
 import { initializeApp, cert } from "firebase-admin/app";
 
-// Load environment variables
-import dotenv from "dotenv";
-dotenv.config();
+// Note: On Vercel, environment variables are automatically available via process.env
+// No need to use dotenv.config() - Vercel handles this automatically
 
 // Firebase Admin Setup - using type assertion to allow object credentials
 const serviceAccount = {

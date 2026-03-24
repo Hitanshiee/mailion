@@ -1,8 +1,7 @@
 import { google } from "googleapis";
 
-// Load environment variables
-import dotenv from "dotenv";
-dotenv.config();
+// Note: On Vercel, environment variables are automatically available via process.env
+// No need to use dotenv.config() - Vercel handles this automatically
 
 const SCOPES = [
   "https://www.googleapis.com/auth/gmail.send",
