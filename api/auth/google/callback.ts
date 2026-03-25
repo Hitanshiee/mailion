@@ -1,6 +1,7 @@
 import { google } from "googleapis";
 import admin from "firebase-admin";
 import { initializeApp, cert } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
 
 // Note: On Vercel, environment variables are automatically available via process.env
 // No need to use dotenv.config() - Vercel handles this automatically
@@ -25,8 +26,7 @@ try {
   initializeApp({
     credential: cert(serviceAccount as any),
   });
-  const Firestore = require('firebase-admin/firestore');
-  db = Firestore.getFirestore();
+  db = getFirestore();
 } catch (error) {
   // Firebase may already be initialized
   console.log("Firebase app initialization:", error instanceof Error ? error.message : "Already initialized");
