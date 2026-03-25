@@ -11,8 +11,10 @@ const SCOPES = [
 function getOAuth2Client() {
   let redirectUri: string;
   
-  // For serverless environment, always use production redirect
-  if (process.env.APP_URL) {
+  // For serverless environment, use Vercel's deployment URL or fallback to APP_URL
+  if (process.env.VERCEL_URL) {
+    redirectUri = `https://${process.env.VERCEL_URL}/api/auth/google/callback`;
+  } else if (process.env.APP_URL) {
     redirectUri = `${process.env.APP_URL.replace(/\/$/, '')}/api/auth/google/callback`;
   } else {
     redirectUri = process.env.GOOGLE_REDIRECT_URI || "http://localhost:3000/api/auth/google/callback";

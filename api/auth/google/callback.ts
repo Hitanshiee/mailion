@@ -35,8 +35,10 @@ try {
 function getOAuth2Client() {
   let redirectUri: string;
   
-  // For serverless environment, always use production redirect
-  if (process.env.APP_URL) {
+  // For serverless environment, use Vercel's deployment URL or fallback to APP_URL
+  if (process.env.VERCEL_URL) {
+    redirectUri = `https://${process.env.VERCEL_URL}/api/auth/google/callback`;
+  } else if (process.env.APP_URL) {
     redirectUri = `${process.env.APP_URL.replace(/\/$/, '')}/api/auth/google/callback`;
   } else {
     redirectUri = process.env.GOOGLE_REDIRECT_URI || "http://localhost:3000/api/auth/google/callback";
@@ -93,11 +95,17 @@ export default async function handler(req: any, res: any) {
     }
     
     // Redirect to app with success
-    const appUrl = process.env.APP_URL || "http://localhost:5173";
+    // For serverless environment, use Vercel's deployment URL
+    const appUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : process.env.APP_URL || "http://localhost:5173";
     res.redirect(`${appUrl}/settings?connected=true`);
   } catch (error: any) {
     console.error("Error exchanging code for tokens:", error);
-    const appUrl = process.env.APP_URL || "http://localhost:5173";
+    // For serverless environment, use Vercel's deployment URL
+    const appUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : process.env.APP_URL || "http://localhost:5173";
     res.redirect(`${appUrl}/settings?error=auth_failed`);
   }
 }
