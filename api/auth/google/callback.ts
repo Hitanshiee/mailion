@@ -35,9 +35,14 @@ try {
 function getOAuth2Client() {
   let redirectUri: string;
   
-  // For serverless environment, use Vercel's deployment URL or fallback to APP_URL
+  // For serverless environment, use Vercel's deployment URL
   if (process.env.VERCEL_URL) {
-    redirectUri = `https://${process.env.VERCEL_URL}/api/auth/google/callback`;
+    // If it's a preview URL (contains random suffix), try to use main production domain
+    if (process.env.VERCEL_URL.includes('-')) {
+      redirectUri = `https://automailor.vercel.app/api/auth/google/callback`;
+    } else {
+      redirectUri = `https://${process.env.VERCEL_URL}/api/auth/google/callback`;
+    }
   } else if (process.env.APP_URL) {
     redirectUri = `${process.env.APP_URL.replace(/\/$/, '')}/api/auth/google/callback`;
   } else {
@@ -96,16 +101,18 @@ export default async function handler(req: any, res: any) {
     
     // Redirect to app with success
     // For serverless environment, use Vercel's deployment URL
-    const appUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : process.env.APP_URL || "http://localhost:5173";
+    // Use main production domain for redirect
+    const appUrl = process.env.VERCEL_URL && !process.env.VERCEL_URL.includes('-')
+      ? `https://${process.env.VERCEL_URL}`
+      : "https://automailor.vercel.app";
     res.redirect(`${appUrl}/settings?connected=true`);
   } catch (error: any) {
     console.error("Error exchanging code for tokens:", error);
     // For serverless environment, use Vercel's deployment URL
-    const appUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : process.env.APP_URL || "http://localhost:5173";
+    // Use main production domain for redirect
+    const appUrl = process.env.VERCEL_URL && !process.env.VERCEL_URL.includes('-')
+      ? `https://${process.env.VERCEL_URL}`
+      : "https://automailor.vercel.app";
     res.redirect(`${appUrl}/settings?error=auth_failed`);
   }
 }

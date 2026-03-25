@@ -13,7 +13,12 @@ function getOAuth2Client() {
   
   // For serverless environment, use Vercel's deployment URL or fallback to APP_URL
   if (process.env.VERCEL_URL) {
-    redirectUri = `https://${process.env.VERCEL_URL}/api/auth/google/callback`;
+    // If it's a preview URL (contains random suffix), try to use main production domain
+    if (process.env.VERCEL_URL.includes('-')) {
+      redirectUri = `https://automailor.vercel.app/api/auth/google/callback`;
+    } else {
+      redirectUri = `https://${process.env.VERCEL_URL}/api/auth/google/callback`;
+    }
   } else if (process.env.APP_URL) {
     redirectUri = `${process.env.APP_URL.replace(/\/$/, '')}/api/auth/google/callback`;
   } else {
