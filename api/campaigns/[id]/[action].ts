@@ -30,7 +30,7 @@ try {
   db = getFirestore();
 }
 
-// Campaign start/stop handler
+// Campaign start/stop/complete handler
 export default async function handler(req: any, res: any) {
   // Set CORS headers
   res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -55,8 +55,10 @@ export default async function handler(req: any, res: any) {
       return res.status(400).json({ error: 'Campaign ID is required' });
     }
 
-    if (action !== 'start' && action !== 'stop') {
-      return res.status(400).json({ error: 'Invalid action. Use "start" or "stop"' });
+    // Validate action
+    const validActions = ['start', 'stop', 'complete'];
+    if (!validActions.includes(action as string)) {
+      return res.status(400).json({ error: 'Invalid action. Use "start", "stop", or "complete"' });
     }
 
     // Get the campaign
@@ -92,11 +94,18 @@ export default async function handler(req: any, res: any) {
         status: 'paused',
         stoppedAt: new Date()
       });
+      
+    } else if (action === 'complete') {
+      // Mark campaign as completed
+      await campaignRef.update({
+        status: 'completed',
+        completedAt: new Date()
+      });
     }
 
     return res.status(200).json({ 
       success: true, 
-      message: `Campaign ${action === 'start' ? 'started' : 'stopped'} successfully` 
+      message: `Campaign ${action} successful` 
     });
 
   } catch (error: any) {
